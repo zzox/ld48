@@ -1,7 +1,7 @@
 package objects;
 
+import objects.DItem.DItem;
 import flixel.math.FlxPoint;
-import flixel.FlxSprite;
 import PlayState;
 
 enum ItemType {
@@ -9,9 +9,16 @@ enum ItemType {
     Rock;
 }
 
-class Item extends FlxSprite {
+enum Dir {
+    Left;
+    Right;
+    Up;
+    Down;
+}
+
+class Item extends DItem {
     var position:ItemPos;
-    var thrown:Bool;
+    var thrown:Null<Dir>;
     var canLight:Bool;
     public var lit:Bool;
     public var held:Bool;
@@ -32,7 +39,7 @@ class Item extends FlxSprite {
             canLight = false;
         }
 
-        thrown = false;
+        thrown = null;
         held = false;
         lit = false;
 
@@ -58,8 +65,12 @@ class Item extends FlxSprite {
         var anim = name;
         if (held) {
             anim += '-held';
-        } else if (thrown) {
+            depth = 5;
+        } else if (thrown != null) {
             anim += '-thrown';
+            depth = 5;
+        } else {
+            depth = 1;
         }
 
         if (lit) {

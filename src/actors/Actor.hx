@@ -1,11 +1,11 @@
 package actors;
 
 import PlayState;
-import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
+import objects.DItem;
 
-class Actor extends FlxSprite {
+class Actor extends DItem {
     static inline final FPS = 60;
     var name:String;
     public var pos:ItemPos;

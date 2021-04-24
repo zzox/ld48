@@ -15,6 +15,7 @@ class Player extends Actor {
         super(startingPos.x, startingPos.y, 'player', pos, 240);
 
         this.scene = scene;
+        depth = 2;
 
         loadGraphic(AssetPaths.don__png, true, 24, 24);
         offset.set(9, 6);
@@ -56,7 +57,7 @@ class Player extends Actor {
 
     // drop the item
     public function drop () {
-        scene.playerDrop(held, pos);
+        scene.drop(held, pos);
         Browser.console.log('dropped', held);
 
         // if the item held is being held its false,

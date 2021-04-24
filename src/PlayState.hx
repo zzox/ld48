@@ -1,6 +1,8 @@
 package;
 
-import actors.Actor;
+import flixel.util.FlxSort;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import objects.DItem;
 import actors.Player;
 import data.Levels;
 import flixel.FlxG;
@@ -30,6 +32,8 @@ class PlayState extends FlxState {
 
     var items:Array<Item>;
     var gameData:Array<Array<LevelItem>>;
+
+    var displayGroup:FlxTypedGroup<DItem>;
 
     var player:Player;
 
@@ -84,17 +88,25 @@ class PlayState extends FlxState {
 
         createTilemap(tileArray);
 
-        add(player);
-        for (item in items) add(item);
+        displayGroup = new FlxTypedGroup<DItem>();
+        displayGroup.add(player);
+        for (item in items) displayGroup.add(item);
+
+        add(displayGroup);
+
+        // add lighting
     }
 
     override public function update(elapsed:Float) {
         updateGameData();
 
+        displayGroup.sort((order:Int, obj1:DItem, obj2:DItem) ->
+            FlxSort.byValues(order, obj1.depth, obj2.depth)
+        );
+
         super.update(elapsed);
     }
 
-    // LATER: around turning around in a square?
     function updateGameData () {
         var toItem:Null<LevelItem> = null;
 
@@ -162,7 +174,7 @@ class PlayState extends FlxState {
         }
     }
 
-    public function playerDrop (item:Item, pos:ItemPos) {
+    public function drop (item:Item, pos:ItemPos) {
         var floorItem:LevelItem = getItem(pos.x, pos.y);
 
         // switch the items out, temporarily held by nothing
@@ -170,6 +182,8 @@ class PlayState extends FlxState {
             var tempItem = floorItem.item;
 
             // break one of the two
+
+
         }
 
         floorItem.item = item;
