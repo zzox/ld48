@@ -11,12 +11,17 @@ class Actor extends DItem {
     public var pos:ItemPos;
     public var moving:Bool;
     var speed:Int;
+    var displayOffset:FlxPoint = new FlxPoint();
 
-    public function new (x:Float, y:Float, name:String, pos:ItemPos, speed:Int) {
+    public function new (x:Float, y:Float, name:String, pos:ItemPos, speed:Int, ?displayOffset:FlxPoint) {
         super(x, y);
         this.name = name;
         this.pos = pos;
         this.speed = speed;
+
+        if (displayOffset != null) {
+            this.displayOffset = displayOffset;
+        }
 
         moving = false;
     }
@@ -28,7 +33,7 @@ class Actor extends DItem {
 
         FlxTween.tween(
             this,
-            { x: worldPos.x, y: worldPos.y },
+            { x: worldPos.x + displayOffset.x, y: worldPos.y + displayOffset.y },
             FPS / speed,
             { onComplete: (_:FlxTween) -> { this.moving = false; } }
         );
