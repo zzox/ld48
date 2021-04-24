@@ -1,25 +1,24 @@
 package objects;
 
+import flixel.tweens.FlxTween;
+import js.Browser;
 import objects.DItem.DItem;
 import flixel.math.FlxPoint;
 import PlayState;
+import Utils;
 
 enum ItemType {
     Torch;
     Rock;
 }
 
-enum Dir {
-    Left;
-    Right;
-    Up;
-    Down;
-}
-
 class Item extends DItem {
-    var position:ItemPos;
-    var thrown:Null<Dir>;
-    var canLight:Bool;
+    static inline final FPS = 60;
+    static inline final THROW_SPEED = 600;
+    public var pos:ItemPos;
+    public var moving:Bool;
+    public var thrown:Null<Dir>;
+    public var canLight:Bool;
     public var lit:Bool;
     public var held:Bool;
     var name:String;
@@ -39,9 +38,12 @@ class Item extends DItem {
             canLight = false;
         }
 
+        this.pos = pos;
+
         thrown = null;
         held = false;
         lit = false;
+        moving = false;
 
         animation.add('torch', [0], 1, true);
         animation.add('torch-held', [0, 1], 1, true);
@@ -52,13 +54,6 @@ class Item extends DItem {
         animation.add('rock', [16], 1, true);
         animation.add('rock-held', [16, 17], 1, true);
         animation.add('rock-thrown', [16, 18, 19, 20], 10, true);
-    }
-
-    public function check () {
-        // if thrown, and ! moving, we
-            // check to see if we keep going or not.
-            // if so, we check if we can light
-            // if not, we put the item on the ground
     }
 
     override public function update (elapsed:Float) {
@@ -82,5 +77,25 @@ class Item extends DItem {
         // if there is a light, update its position
 
         super.update(elapsed);
+    }
+
+    public function throwMe (newPos:ItemPos, dir:Dir) {
+        var worldPos:FlxPoint = Utils.translatePos(newPos);
+        var speedCoefDist = dir == Left || dir == Right ? Math.abs(worldPos.x - x) : Math.abs(worldPos.y - y);
+        var tweenTime = (FPS / THROW_SPEED) * (speedCoefDist == 0 ? 0.00000001 : speedCoefDist / 16);
+        Browser.console.log(speedCoefDist, tweenTime, (FPS / THROW_SPEED));
+
+        this.moving = true;
+        thrown = dir;
+        held = false;
+
+        FlxTween.tween(
+            this,
+            {x: worldPos.x, y: worldPos.y },
+            tweenTime,
+            { onComplete: (_:FlxTween) -> { this.moving = false; } }
+        );
+
+        pos = newPos;
     }
 }

@@ -10,6 +10,7 @@ import flixel.FlxState;
 import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import objects.Item;
+import Utils;
 
 typedef LevelItem = {
     var pos:ItemPos;
@@ -119,6 +120,8 @@ class PlayState extends FlxState {
                 if (checked != null) {
                     toItem = checked;
                 }
+
+                player.isFacing = Left;
             }
 
             if (FlxG.keys.pressed.RIGHT) {
@@ -127,6 +130,8 @@ class PlayState extends FlxState {
                 if (checked != null) {
                     toItem = checked;
                 }
+
+                player.isFacing = Right;
             }
 
             if (FlxG.keys.pressed.UP) {
@@ -135,6 +140,8 @@ class PlayState extends FlxState {
                 if (checked != null) {
                     toItem = checked;
                 }
+
+                player.isFacing = Up;
             }
 
             if (FlxG.keys.pressed.DOWN) {
@@ -143,6 +150,8 @@ class PlayState extends FlxState {
                 if (checked != null) {
                     toItem = checked;
                 }
+
+                player.isFacing = Down;
             }
         }
 
@@ -156,7 +165,7 @@ class PlayState extends FlxState {
         }
 
         // pick up logic
-        if (FlxG.keys.anyJustPressed([TAB, X])) {
+        if (FlxG.keys.anyJustPressed([TAB, Z])) {
             var atItem = getItem(player.pos.x, player.pos.y);
 
             // switch the items out, temporarily held by nothing
@@ -165,24 +174,54 @@ class PlayState extends FlxState {
                 atItem.item = null;
 
                 player.pickUp(tempItem);
+            } else {
+                // play miss sound
+            }
+        }
+
+        if (FlxG.keys.anyJustPressed([SPACE, X])) {
+            if (player.held != null) {
+                var heldItem = player.held;
+                heldItem.throwMe(player.pos, player.isFacing);
+                var levelItem = getItem(player.pos.x, player.pos.y);
+                levelItem.thrownItem = heldItem;
+
+                player.held = null;
+            } else {
+                // play miss sound
             }
         }
 
         // check thrown, etc.
         for (item in items) {
-            item.check();
+            if (!item.moving && item.thrown != null) {
+                var toItem = getItemFromDir(item.pos, item.thrown);
+                if (toItem.floorType == Wall) {
+                    drop(item, item.pos);
+                } else {
+                    item.throwMe(toItem.pos, item.thrown);
+                }
+                // check lights
+                    // rock turns out lights
+                    // lit torch turns them on
+            }
         }
     }
 
     public function drop (item:Item, pos:ItemPos) {
+        item.held = false;
+        item.thrown = null;
+
         var floorItem:LevelItem = getItem(pos.x, pos.y);
 
         // switch the items out, temporarily held by nothing
         if (floorItem.item != null) {
             var tempItem = floorItem.item;
 
-            // break one of the two
 
+            // break one of the two
+            // if the floor item is a rock, kill the thrown item
+                // otherwise, kill the floor item
 
         }
 
@@ -196,6 +235,20 @@ class PlayState extends FlxState {
         }
 
         return null;
+    }
+
+    function getItemFromDir (pos:ItemPos, dir:Dir):LevelItem {
+        var x = pos.x;
+        var y = pos.y;
+
+        switch (dir) {
+            case Left: x--;
+            case Right: x++;
+            case Up: y--;
+            case Down: y++;
+        }
+
+        return getItem(x, y);
     }
 
     function getItem (x:Int, y:Int):LevelItem {

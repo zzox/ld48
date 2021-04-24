@@ -4,10 +4,12 @@ import js.Browser;
 import flixel.math.FlxPoint;
 import objects.Item;
 import PlayState;
+import Utils;
 
 class Player extends Actor {
     var scene:PlayState;
-    var held:Null<Item>;
+    public var held:Null<Item>;
+    public var isFacing:Dir;
 
     public function new(x:Float, y:Float, pos:ItemPos, scene:PlayState) {
         var startingPos:FlxPoint = Utils.translatePos(pos);
@@ -16,6 +18,7 @@ class Player extends Actor {
 
         this.scene = scene;
         depth = 2;
+        isFacing = Down;
 
         loadGraphic(AssetPaths.don__png, true, 24, 24);
         offset.set(9, 6);
@@ -62,7 +65,6 @@ class Player extends Actor {
 
         // if the item held is being held its false,
         // then if we are holding something thats null lol
-        held.held = false;
         held = null;
     }
 }
