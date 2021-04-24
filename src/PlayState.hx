@@ -33,7 +33,8 @@ class PlayState extends FlxState {
     override public function create() {
         super.create();
 
-        // camera.pixelPerfectRender = true;
+        camera.pixelPerfectRender = true;
+
         var playerPos:ItemPos = { x: 2, y: 2 };
         player = new Player(0, 0, playerPos, this);
 
@@ -77,41 +78,58 @@ class PlayState extends FlxState {
         var item:Null<LevelItem> = null;
 
         // TODO: buffer/recentcy system
+        // only assign if we can go, solving for multiple presses when rounding corners
         if (!player.moving) {
             if (FlxG.keys.pressed.LEFT) {
-                item = getItem(player.pos.x - 1, player.pos.y);
+                var checked = checkItem({ x: player.pos.x - 1, y: player.pos.y });
+
+                if (checked != null) {
+                    item = checked;
+                }
             }
 
             if (FlxG.keys.pressed.RIGHT) {
-                item = getItem(player.pos.x + 1, player.pos.y);
+                var checked = checkItem({ x: player.pos.x + 1, y: player.pos.y });
+
+                if (checked != null) {
+                    item = checked;
+                }
             }
 
             if (FlxG.keys.pressed.UP) {
-                item = getItem(player.pos.x, player.pos.y - 1);
+                var checked = checkItem({ x: player.pos.x, y: player.pos.y - 1 });
+
+                if (checked != null) {
+                    item = checked;
+                }
             }
 
             if (FlxG.keys.pressed.DOWN) {
-                item = getItem(player.pos.x, player.pos.y + 1);
+                var checked = checkItem({ x: player.pos.x, y: player.pos.y + 1 });
+
+                if (checked != null) {
+                    item = checked;
+                }
             }
         }
 
         // if player can move AND has pressed a direction
         if (item != null) {
-
             if (item.floorType == Floor) {
                 player.move(item.pos);
-                trace('can move!');
             } else {
-                trace('can\'t move!');
+                // already checked, but we can play sound here
             }
         }
-
-
     }
 
-    function movePlayer () {
-        // tween to new position
-        // on complete, set to moving! false
+    function checkItem (pos:ItemPos):Null<LevelItem> {
+        var item:LevelItem = getItem(pos.x, pos.y);
+        if (item.floorType == Floor) {
+            return item;
+        }
+
+        return null;
     }
 
     function getItem (x:Int, y:Int):LevelItem {

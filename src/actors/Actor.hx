@@ -26,8 +26,6 @@ class Actor extends FlxSprite {
 
         moving = true;
 
-        trace(FPS / speed);
-
         FlxTween.tween(
             this,
             { x: worldPos.x, y: worldPos.y },
