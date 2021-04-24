@@ -14,14 +14,14 @@ class Actor extends DItem {
     var displayOffset:FlxPoint = new FlxPoint();
 
     public function new (x:Float, y:Float, name:String, pos:ItemPos, speed:Int, ?displayOffset:FlxPoint) {
-        super(x, y);
-        this.name = name;
-        this.pos = pos;
-        this.speed = speed;
-
         if (displayOffset != null) {
             this.displayOffset = displayOffset;
         }
+
+        super(x + displayOffset.x, y + displayOffset.y);
+        this.name = name;
+        this.pos = pos;
+        this.speed = speed;
 
         moving = false;
     }

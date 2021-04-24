@@ -1,6 +1,5 @@
 package actors;
 
-import js.Browser;
 import flixel.math.FlxPoint;
 import objects.Item;
 import PlayState;
@@ -52,7 +51,6 @@ class Player extends Actor {
             drop();
         }
 
-        Browser.console.log('picked up', item);
         held = item;
         item.held = true;
         // play sound
@@ -61,7 +59,6 @@ class Player extends Actor {
     // drop the item
     public function drop () {
         scene.drop(held, pos);
-        Browser.console.log('dropped', held);
 
         // if the item held is being held its false,
         // then if we are holding something thats null lol

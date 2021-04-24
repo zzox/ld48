@@ -1,7 +1,6 @@
 package objects;
 
 import flixel.tweens.FlxTween;
-import js.Browser;
 import objects.DItem.DItem;
 import flixel.math.FlxPoint;
 import PlayState;
@@ -45,15 +44,15 @@ class Item extends DItem {
         lit = false;
         moving = false;
 
-        animation.add('torch', [0], 1, true);
-        animation.add('torch-held', [0, 1], 1, true);
-        animation.add('torch-lit', [2, 3, 4], 1, true);
-        animation.add('torch-held-lit', [2, 3, 4, 5, 6, 7], 1, true);
-        animation.add('torch-thrown', [8, 9, 10, 11], 10, true);
-        animation.add('torch-thrown-lit', [12, 13, 14, 15], 10, true);
-        animation.add('rock', [16], 1, true);
-        animation.add('rock-held', [16, 17], 1, true);
-        animation.add('rock-thrown', [16, 18, 19, 20], 10, true);
+        animation.add('torch', [0], 1);
+        animation.add('torch-held', [0, 1], 1);
+        animation.add('torch-lit', [2, 3, 4], 1);
+        animation.add('torch-held-lit', [2, 3, 4, 5, 6, 7], 1);
+        animation.add('torch-thrown', [8, 9, 10, 11], 15);
+        animation.add('torch-thrown-lit', [12, 13, 14, 15], 15);
+        animation.add('rock', [16], 1);
+        animation.add('rock-held', [16, 17], 1);
+        animation.add('rock-thrown', [16, 18, 19, 20], 15);
     }
 
     override public function update (elapsed:Float) {
@@ -83,7 +82,6 @@ class Item extends DItem {
         var worldPos:FlxPoint = Utils.translatePos(newPos);
         var speedCoefDist = dir == Left || dir == Right ? Math.abs(worldPos.x - x) : Math.abs(worldPos.y - y);
         var tweenTime = (FPS / THROW_SPEED) * (speedCoefDist == 0 ? 0.00000001 : speedCoefDist / 16);
-        Browser.console.log(speedCoefDist, tweenTime, (FPS / THROW_SPEED));
 
         this.moving = true;
         thrown = dir;

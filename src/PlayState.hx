@@ -1,5 +1,6 @@
 package;
 
+import flixel.math.FlxPoint;
 import flixel.util.FlxSort;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import objects.DItem;
@@ -10,6 +11,7 @@ import flixel.FlxState;
 import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import objects.Item;
+import objects.TorchSet;
 import Utils;
 
 typedef LevelItem = {
@@ -19,6 +21,7 @@ typedef LevelItem = {
     // var monster:Null<Monster>;
     var item:Null<Item>;
     var thrownItem:Null<Item>;
+    var torchSet:Null<TorchSet>;
 }
 
 // Needed?
@@ -26,7 +29,6 @@ typedef ItemPos = {
     var x:Int;
     var y:Int;
 }
-
 
 class PlayState extends FlxState {
     static inline final TILE_SIZE = 16;
@@ -47,10 +49,13 @@ class PlayState extends FlxState {
 
         // REMOVE: get from game data later
         var torchPos:ItemPos = { x: 5, y: 2 };
+        var torchesPos:ItemPos = { x: 1, y: 8 };
+        var torchesPos2:ItemPos = { x: 13, y: 1 };
 
         player = new Player(0, 0, playerPos, this);
 
         var tileArray = [];
+        var torchSets = [];
         gameData = [];
         items = [];
         for (y in 0...Levels.data.length) {
@@ -58,17 +63,20 @@ class PlayState extends FlxState {
             for (x in 0...Levels.data[y].length) {
                 tileArray.push(Levels.data[y][x].item);
 
+                var thisPos:ItemPos = { x: x, y: y };
+
                 var floorType = Wall;
                 if (Levels.data[y][x].item == 6) {
                     floorType = Floor;
                 }
 
                 var item = {
-                    pos: { x: x, y: y },
+                    pos: thisPos,
                     floorType: floorType,
                     player: null,
                     item: null,
-                    thrownItem: null
+                    thrownItem: null,
+                    torchSet: null
                 };
 
                 if (x == playerPos.x && y == playerPos.y) {
@@ -79,6 +87,34 @@ class PlayState extends FlxState {
                     var torch = new Item(0, 0, Torch, torchPos);
                     items.push(torch);
                     item.item = torch;
+                }
+
+                if (x == torchesPos.x && y == torchesPos.y) {
+                    var torchesPosi:FlxPoint = Utils.translatePos(thisPos); // change name
+                    var torchSet = new TorchSet(
+                        torchesPosi.x,
+                        torchesPosi.y,
+                        thisPos,
+                        true // temp
+                    );
+
+                    item.torchSet = torchSet;
+
+                    torchSets.push(torchSet);
+                }
+
+                if (x == torchesPos2.x && y == torchesPos2.y) {
+                    var torchesPosi:FlxPoint = Utils.translatePos(thisPos); // change name
+                    var torchSet = new TorchSet(
+                        torchesPosi.x,
+                        torchesPosi.y,
+                        thisPos,
+                        true // temp
+                    );
+
+                    item.torchSet = torchSet;
+
+                    torchSets.push(torchSet);
                 }
 
                 row.push(item);
@@ -94,6 +130,17 @@ class PlayState extends FlxState {
         for (item in items) displayGroup.add(item);
 
         add(displayGroup);
+
+        for (torch in torchSets) {
+            torch.addItems(
+                checkItem({ x: torch.pos.x - 1, y: torch.pos.y }) == null,
+                checkItem({ x: torch.pos.x + 1, y: torch.pos.y }) == null,
+                checkItem({ x: torch.pos.x, y: torch.pos.y - 1 }) == null,
+                checkItem({ x: torch.pos.x, y: torch.pos.y + 1 }) == null
+            );
+
+            add(torch);
+        }
 
         // add lighting
     }

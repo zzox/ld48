@@ -8,6 +8,8 @@ class Light extends FlxSprite {
 
         // needs a "none" animation
         // animation.onComplete = () ->
+
+        // small and large?
     }
 
     function animOnComplete (animName:String) {
@@ -20,12 +22,12 @@ class Light extends FlxSprite {
         }
     }
 
-    function ignite () {
+    public function ignite () {
         // play sound
         // play light, which triggers
     }
 
-    function extinguish () {
+    public function extinguish () {
         // play sound
         // play ignite in reerse, then play none
     }
