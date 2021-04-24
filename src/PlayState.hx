@@ -201,6 +201,10 @@ class PlayState extends FlxState {
 
                 player.isFacing = Down;
             }
+
+            if (player.held != null && player.held.type == Torch && toItem != null && toItem.torchSet != null) {
+                lightIfPossible(player.held, toItem.torchSet);
+            }
         }
 
         // if player can move AND has pressed a direction
@@ -246,14 +250,7 @@ class PlayState extends FlxState {
                 var toItem = getItemFromDir(item.pos, item.thrown);
 
                 if (item.type == Torch && toItem.torchSet != null) {
-                    var torchSet = toItem.torchSet;
-                    if (item.lit && !torchSet.lit) {
-                        torchSet.light();
-                    }
-
-                    if (!item.lit && torchSet.lit) {
-                        item.lit = true;
-                    }
+                    lightIfPossible(item, toItem.torchSet);
                 }
 
                 if (toItem.floorType == Wall) {
@@ -262,6 +259,16 @@ class PlayState extends FlxState {
                     item.throwMe(toItem.pos, item.thrown);
                 }
             }
+        }
+    }
+
+    function lightIfPossible (item:Item, torchSet:TorchSet) {
+        if (item.lit && !torchSet.lit) {
+            torchSet.light();
+        }
+
+        if (!item.lit && torchSet.lit) {
+            item.lit = true;
         }
     }
 
