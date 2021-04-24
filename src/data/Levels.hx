@@ -1,5 +1,10 @@
 package data;
 
+enum FloorType {
+    Wall;
+    Floor;
+}
+
 class Levels {
     public static final data = [
         [{item: 1},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 3}],
