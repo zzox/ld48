@@ -62,6 +62,8 @@ class TorchSet extends FlxGroup {
         for (light in lightItems) {
             light.ignite();
         }
+
+        lit = true;
     }
 
     public function extinguish () {
@@ -72,6 +74,8 @@ class TorchSet extends FlxGroup {
         for (light in lightItems) {
             light.extinguish();
         }
+
+        lit = false;
     }
 
     override function update (elapsed:Float) {

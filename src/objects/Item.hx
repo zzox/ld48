@@ -14,6 +14,7 @@ enum ItemType {
 class Item extends DItem {
     static inline final FPS = 60;
     static inline final THROW_SPEED = 600;
+    public var type:ItemType;
     public var pos:ItemPos;
     public var moving:Bool;
     public var thrown:Null<Dir>;
@@ -38,6 +39,7 @@ class Item extends DItem {
         }
 
         this.pos = pos;
+        this.type = type;
 
         thrown = null;
         held = false;
@@ -45,13 +47,13 @@ class Item extends DItem {
         moving = false;
 
         animation.add('torch', [0], 1);
-        animation.add('torch-held', [0, 1], 1);
-        animation.add('torch-lit', [2, 3, 4], 1);
-        animation.add('torch-held-lit', [2, 3, 4, 5, 6, 7], 1);
+        animation.add('torch-held', [0], 1); // temp?
+        animation.add('torch-lit', [2, 3, 4], 15);
+        animation.add('torch-held-lit', [2, 3, 4], 15); // temp?
         animation.add('torch-thrown', [8, 9, 10, 11], 15);
         animation.add('torch-thrown-lit', [12, 13, 14, 15], 15);
         animation.add('rock', [16], 1);
-        animation.add('rock-held', [16, 17], 1);
+        animation.add('rock-held', [16], 1); // temp?
         animation.add('rock-thrown', [16, 18, 19, 20], 15);
     }
 
@@ -68,12 +70,12 @@ class Item extends DItem {
         }
 
         if (lit) {
-            anim += 'lit';
+            anim += '-lit';
         }
 
         animation.play(anim);
 
-        // if there is a light, update its position
+        // if there is a light, update its position and light status
 
         super.update(elapsed);
     }

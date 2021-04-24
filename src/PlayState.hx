@@ -1,5 +1,6 @@
 package;
 
+import js.Browser;
 import flixel.math.FlxPoint;
 import flixel.util.FlxSort;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -109,7 +110,7 @@ class PlayState extends FlxState {
                         torchesPosi.x,
                         torchesPosi.y,
                         thisPos,
-                        true // temp
+                        false // temp
                     );
 
                     item.torchSet = torchSet;
@@ -243,14 +244,23 @@ class PlayState extends FlxState {
         for (item in items) {
             if (!item.moving && item.thrown != null) {
                 var toItem = getItemFromDir(item.pos, item.thrown);
+
+                if (item.type == Torch && toItem.torchSet != null) {
+                    var torchSet = toItem.torchSet;
+                    if (item.lit && !torchSet.lit) {
+                        torchSet.light();
+                    }
+
+                    if (!item.lit && torchSet.lit) {
+                        item.lit = true;
+                    }
+                }
+
                 if (toItem.floorType == Wall) {
                     drop(item, item.pos);
                 } else {
                     item.throwMe(toItem.pos, item.thrown);
                 }
-                // check lights
-                    // rock turns out lights
-                    // lit torch turns them on
             }
         }
     }
