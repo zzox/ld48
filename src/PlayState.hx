@@ -7,13 +7,15 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
+import objects.Item;
 
 typedef LevelItem = {
     var pos:ItemPos;
     var floorType:FloorType;
     var player:Null<Player>;
     // var monster:Null<Monster>;
-    // var item:Null<Item>;
+    var item:Null<Item>;
+    var thrownItem:Null<Item>;
 }
 
 // Needed?
@@ -26,6 +28,7 @@ typedef ItemPos = {
 class PlayState extends FlxState {
     static inline final TILE_SIZE = 16;
 
+    var items:Array<Item>;
     var gameData:Array<Array<LevelItem>>;
 
     var player:Player;
@@ -36,10 +39,15 @@ class PlayState extends FlxState {
         camera.pixelPerfectRender = true;
 
         var playerPos:ItemPos = { x: 2, y: 2 };
+
+        // REMOVE: get from game data later
+        var torchPos:ItemPos = { x: 5, y: 2 };
+
         player = new Player(0, 0, playerPos, this);
 
         var tileArray = [];
         gameData = [];
+        items = [];
         for (y in 0...Levels.data.length) {
             var row = [];
             for (x in 0...Levels.data[y].length) {
@@ -50,10 +58,22 @@ class PlayState extends FlxState {
                     floorType = Floor;
                 }
 
-                var item = { pos: { x: x, y: y }, floorType: floorType, player: null };
+                var item = {
+                    pos: { x: x, y: y },
+                    floorType: floorType,
+                    player: null,
+                    item: null,
+                    thrownItem: null
+                };
 
                 if (x == playerPos.x && y == playerPos.y) {
                     item.player = player;
+                }
+
+                if (x == torchPos.x && y == torchPos.y) {
+                    var torch = new Item(0, 0, Torch, torchPos);
+                    items.push(torch);
+                    item.item = torch;
                 }
 
                 row.push(item);
@@ -65,6 +85,7 @@ class PlayState extends FlxState {
         createTilemap(tileArray);
 
         add(player);
+        for (item in items) add(item);
     }
 
     override public function update(elapsed:Float) {
@@ -75,7 +96,7 @@ class PlayState extends FlxState {
 
     // LATER: around turning around in a square?
     function updateGameData () {
-        var item:Null<LevelItem> = null;
+        var toItem:Null<LevelItem> = null;
 
         // TODO: buffer/recentcy system
         // only assign if we can go, solving for multiple presses when rounding corners
@@ -84,7 +105,7 @@ class PlayState extends FlxState {
                 var checked = checkItem({ x: player.pos.x - 1, y: player.pos.y });
 
                 if (checked != null) {
-                    item = checked;
+                    toItem = checked;
                 }
             }
 
@@ -92,7 +113,7 @@ class PlayState extends FlxState {
                 var checked = checkItem({ x: player.pos.x + 1, y: player.pos.y });
 
                 if (checked != null) {
-                    item = checked;
+                    toItem = checked;
                 }
             }
 
@@ -100,7 +121,7 @@ class PlayState extends FlxState {
                 var checked = checkItem({ x: player.pos.x, y: player.pos.y - 1 });
 
                 if (checked != null) {
-                    item = checked;
+                    toItem = checked;
                 }
             }
 
@@ -108,19 +129,50 @@ class PlayState extends FlxState {
                 var checked = checkItem({ x: player.pos.x, y: player.pos.y + 1 });
 
                 if (checked != null) {
-                    item = checked;
+                    toItem = checked;
                 }
             }
         }
 
         // if player can move AND has pressed a direction
-        if (item != null) {
-            if (item.floorType == Floor) {
-                player.move(item.pos);
+        if (toItem != null) {
+            if (toItem.floorType == Floor) {
+                player.move(toItem.pos);
             } else {
                 // already checked, but we can play sound here
             }
         }
+
+        // pick up logic
+        if (FlxG.keys.anyJustPressed([TAB, X])) {
+            var atItem = getItem(player.pos.x, player.pos.y);
+
+            // switch the items out, temporarily held by nothing
+            if (atItem.item != null) {
+                var tempItem = atItem.item;
+                atItem.item = null;
+
+                player.pickUp(tempItem);
+            }
+        }
+
+        // check thrown, etc.
+        for (item in items) {
+            item.check();
+        }
+    }
+
+    public function playerDrop (item:Item, pos:ItemPos) {
+        var floorItem:LevelItem = getItem(pos.x, pos.y);
+
+        // switch the items out, temporarily held by nothing
+        if (floorItem.item != null) {
+            var tempItem = floorItem.item;
+
+            // break one of the two
+        }
+
+        floorItem.item = item;
     }
 
     function checkItem (pos:ItemPos):Null<LevelItem> {
