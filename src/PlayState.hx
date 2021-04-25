@@ -340,6 +340,23 @@ class PlayState extends FlxState {
             }
         }
 
+        for (gremlin in gremlins) {
+            if (!gremlin.moving) {
+                var toItem = checkItemForGremlin(getItemFromDir(gremlin.pos, gremlin.dir));
+
+                // if we can't move, we 
+                if (toItem != null) {
+                    gremlin.move(toItem.pos);
+
+                    // if there's a player, kill it
+                } else {
+                    gremlin.dir = gremlin.clockwise
+                        ? Utils.clockwiseMap[gremlin.dir]
+                        : Utils.counterClockwiseMap[gremlin.dir];
+                }
+            }
+        }
+
         // check thrown, etc.
         for (item in items) {
             if (!item.moving && item.thrown != null) {
@@ -399,6 +416,20 @@ class PlayState extends FlxState {
         var item:LevelItem = getItem(pos.x, pos.y);
         if (item.floorType == Floor) {
             return item;
+        }
+
+        return null;
+    }
+
+    function checkItemForGremlin (levelItem:LevelItem):Null<LevelItem> {
+        if (
+            levelItem.floorType == Floor &&
+            !levelItem.start &&
+            !levelItem.exit &&
+            !(levelItem.torchSet != null && levelItem.torchSet.lit) &&
+            !(levelItem.item != null && levelItem.item.type == Torch && levelItem.item.lit)
+        ) {
+            return levelItem;
         }
 
         return null;

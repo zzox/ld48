@@ -1,10 +1,9 @@
 package actors;
 
-import flixel.math.FlxPoint;
-import flixel.util.FlxPool;
-import haxe.display.JsonModuleTypes.JsonEnumField;
-import flixel.util.FlxTimer;
 import PlayState;
+import Utils;
+import flixel.math.FlxPoint;
+import flixel.util.FlxTimer;
 import flixel.FlxSprite;
 import objects.Light;
 
@@ -23,7 +22,8 @@ typedef GremlinData = {
 class Gremlin extends Actor {
     public var eyes:FlxSprite;
     var light:Light;
-    var clockWise:Bool;
+    public var clockwise:Bool;
+    public var dir:Dir;
     var dead:Bool;
 
     static final gremlinMap:Map<GremlinType, GremlinData> = [
@@ -67,7 +67,8 @@ class Gremlin extends Actor {
         eyes = new Eyes(x, y, gremData.blinkTime, gremData.color);
 
         isFacing = Math.random() > 0.5 ? Left : Right;
-        clockWise = Math.random() > 0.5;
+        clockwise = Math.random() > 0.5;
+        startingDir();
 
         dead = false;
     }
@@ -98,6 +99,20 @@ class Gremlin extends Actor {
         super.update(elapsed);
 
         eyes.setPosition(x, y);
+    }
+
+    function startingDir () {
+        var chance = Math.random();
+
+        if (chance < 0.25) {
+            dir = Left;
+        } else if (chance < 0.5) {
+            dir = Right;
+        } else if (chance < 0.75) {
+            dir = Up;
+        } else {
+            dir = Down;
+        }
     }
 }
 
