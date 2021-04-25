@@ -50,8 +50,8 @@ class Item extends DItem {
 
         animation.add('torch', [0], 1);
         animation.add('torch-held', [0], 1); // temp?
-        animation.add('torch-lit', [2, 3, 4], 9);
-        animation.add('torch-held-lit', [2, 3, 4], 9); // temp?
+        animation.add('torch-lit', [2, 3, 4], 6);
+        animation.add('torch-held-lit', [2, 3, 4], 6); // temp?
         animation.add('torch-thrown', [8, 9, 10, 11], 15);
         animation.add('torch-thrown-lit', [12, 13, 14, 15], 15);
         animation.add('rock', [16], 1);
