@@ -21,24 +21,23 @@ typedef GremlinData = {
 
 class Gremlin extends Actor {
     public var eyes:FlxSprite;
-    var light:Light;
+    public var light:Light;
     public var clockwise:Bool;
     public var dir:Dir;
-    var dead:Bool;
 
     static final gremlinMap:Map<GremlinType, GremlinData> = [
         Slow => {
-            blinkTime: 2.5,
+            blinkTime: 1.5,
             speed: 120,
             color: 0xffffe737
         },
         Medium => {
-            blinkTime: 5,
+            blinkTime: 3,
             speed: 240,
             color: 0xffffe737
         },
         Fast => {
-            blinkTime: 10,
+            blinkTime: 6,
             speed: 360,
             color: 0xffffe737
         }
@@ -51,6 +50,7 @@ class Gremlin extends Actor {
         loadGraphic(AssetPaths.gremlin__png, true, 16, 16);
         animation.add('creep', [0], 1);
         animation.add('attack', [1, 2, 3, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1], 20, false);
+        animation.add('die', [4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1], 30, false);
         animation.finishCallback = (animName:String) -> {
             if (animName == 'attack') {
                 if (dead) {
@@ -65,6 +65,7 @@ class Gremlin extends Actor {
         depth = 4;
 
         eyes = new Eyes(x, y, gremData.blinkTime, gremData.color);
+        light = new Light(x - 16, y - 16, Large);
 
         isFacing = Math.random() > 0.5 ? Left : Right;
         clockwise = Math.random() > 0.5;
@@ -75,7 +76,11 @@ class Gremlin extends Actor {
 
     public function killMe () {
         dead = true;
-        animation.play('attack');
+        if (moveTween != null) {
+            moveTween.cancel();
+        }
+
+        animation.play('die');
         light.extinguish();
         hideEyes(true);
     }
@@ -99,6 +104,7 @@ class Gremlin extends Actor {
         super.update(elapsed);
 
         eyes.setPosition(x, y);
+        light.setPosition(x - 16, y - 16);
     }
 
     function startingDir () {
@@ -117,6 +123,7 @@ class Gremlin extends Actor {
 }
 
 class Eyes extends FlxSprite {
+    static inline final BLINK_COEF = 3;
     var blinkTime:Float;
     var time:Float;
 
@@ -142,7 +149,7 @@ class Eyes extends FlxSprite {
         time -= elapsed;
         if (time <= 0) {
             animation.play('blink');
-            time += blinkTime + Math.random() * blinkTime;
+            time += blinkTime + Math.random() * BLINK_COEF * blinkTime;
         }
 
         super.update(elapsed);

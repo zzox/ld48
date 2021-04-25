@@ -9,6 +9,12 @@ class Levels {
         exit: { x: 12, y: 8 },
         gremlins: [{
             pos: { x: 4, y: 4 }, type: Slow
+        }, {
+            pos: { x: 6, y: 1 }, type: Slow
+        }, {
+            pos: { x: 13, y: 1 }, type: Slow
+        }, {
+            pos: { x: 13, y: 6 }, type: Slow
         }],
         rocks: [
             { x: 13, y: 1 }

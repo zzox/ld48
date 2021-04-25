@@ -85,8 +85,7 @@ class Item extends DItem {
         animation.play(anim);
 
         if (light != null) {
-            light.x = x - 16;
-            light.y = y - 16;
+            light.setPosition(x - 16, y - 16);
         }
 
         super.update(elapsed);

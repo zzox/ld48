@@ -214,6 +214,7 @@ class PlayState extends FlxState {
 
         for (gremlin in gremlins) {
             add(gremlin.eyes);
+            lighting.add(gremlin.light);
         }
         // add logo if first level
 
@@ -303,7 +304,10 @@ class PlayState extends FlxState {
             }
 
             if (toItem.floorType == Floor) {
+                var currentPlayerItem = getItem(player.pos.x, player.pos.y);
+                currentPlayerItem.player = null;
                 player.move(toItem.pos);
+                toItem.player = player;
                 // play steps sound
             } else {
                 // already checked, but we can play sound here
@@ -344,9 +348,12 @@ class PlayState extends FlxState {
             if (!gremlin.moving) {
                 var toItem = checkItemForGremlin(getItemFromDir(gremlin.pos, gremlin.dir));
 
-                // if we can't move, we 
+                // if we can't move, we turn and try again next frame
                 if (toItem != null) {
+                    var currentGremlinItem = getItem(gremlin.pos.x, gremlin.pos.y);
+                    currentGremlinItem.gremlin = null;
                     gremlin.move(toItem.pos);
+                    toItem.gremlin = gremlin;
 
                     // if there's a player, kill it
                 } else {
@@ -361,6 +368,17 @@ class PlayState extends FlxState {
         for (item in items) {
             if (!item.moving && item.thrown != null) {
                 var toItem = getItemFromDir(item.pos, item.thrown);
+
+                if (toItem.gremlin != null) {
+                    toItem.gremlin.killMe();
+                    toItem.gremlin = null;
+                    drop(item, item.pos);
+                    if (item.type == Torch) {
+                        item.breakMe();
+                    }
+
+                    return;
+                }
 
                 if (item.type == Torch && toItem.torchSet != null) {
                     lightIfPossible(item, toItem.torchSet);
@@ -426,6 +444,7 @@ class PlayState extends FlxState {
             levelItem.floorType == Floor &&
             !levelItem.start &&
             !levelItem.exit &&
+            !(levelItem.gremlin != null) &&
             !(levelItem.torchSet != null && levelItem.torchSet.lit) &&
             !(levelItem.item != null && levelItem.item.type == Torch && levelItem.item.lit)
         ) {
