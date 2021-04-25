@@ -249,6 +249,29 @@ class PlayState extends FlxState {
         downStepsSound = FlxG.sound.load(AssetPaths.down_steps__wav, 1);
         donShriekSound = FlxG.sound.load(AssetPaths.don_shriek__wav, 1);
         gremlinShriekSound = FlxG.sound.load(AssetPaths.gremlin_shriek__wav, 1);
+
+		if (FlxG.sound.defaultMusicGroup.sounds.length == 0) {
+			FlxG.sound.play(AssetPaths.grem_theme_1__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+			FlxG.sound.play(AssetPaths.grem_theme_2__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+			FlxG.sound.play(AssetPaths.grem_theme_3__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+			FlxG.sound.play(AssetPaths.grem_theme_4__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+			FlxG.sound.play(AssetPaths.grem_theme_5__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+			FlxG.sound.play(AssetPaths.grem_theme_6__wav, 0, true, FlxG.sound.defaultMusicGroup, false);
+		}
+
+		// need to use integers for now, since I don't know how to
+		// properly name the sounds, I'm looking for a path variable or something
+		for (i in 0...FlxG.sound.defaultMusicGroup.sounds.length) {
+			var sound = FlxG.sound.defaultMusicGroup.sounds[i];
+			sound.persist = true;
+
+			var vol:Float = 0.0;
+			if (levelData.sound == i) {
+				vol = 1.0;
+			}
+
+			FlxTween.tween(sound, { volume: vol }, 1.5);
+		}
     }
 
     override public function update(elapsed:Float) {
