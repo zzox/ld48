@@ -6,14 +6,12 @@ import PlayState;
 import Utils;
 
 class Player extends Actor {
-    var scene:PlayState;
     public var held:Null<Item>;
-    public var isFacing:Dir;
 
     public function new(x:Float, y:Float, pos:ItemPos, scene:PlayState) {
         var startingPos:FlxPoint = Utils.translatePos(pos);
 
-        super(startingPos.x, startingPos.y, 'player', pos, 300, new FlxPoint(5, 0));
+        super(startingPos.x, startingPos.y, 'player', pos, 300, scene, new FlxPoint(5, 0));
 
         this.scene = scene;
         depth = 2;

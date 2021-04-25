@@ -1,5 +1,6 @@
 package actors;
 
+import Utils;
 import PlayState;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
@@ -11,17 +12,18 @@ class Actor extends DItem {
     public var pos:ItemPos;
     public var moving:Bool;
     var speed:Int;
-    var displayOffset:FlxPoint = new FlxPoint();
+    var displayOffset:FlxPoint;
+    var scene:PlayState;
+    public var isFacing:Dir;
 
-    public function new (x:Float, y:Float, name:String, pos:ItemPos, speed:Int, ?displayOffset:FlxPoint) {
-        if (displayOffset != null) {
-            this.displayOffset = displayOffset;
-        }
-
+    public function new (x:Float, y:Float, name:String, pos:ItemPos, speed:Int, scene:PlayState, displayOffset:FlxPoint) {
         super(x + displayOffset.x, y + displayOffset.y);
+        this.displayOffset = displayOffset;
+
         this.name = name;
         this.pos = pos;
         this.speed = speed;
+        this.scene = scene;
 
         moving = false;
     }
@@ -39,5 +41,11 @@ class Actor extends DItem {
         );
 
         pos = newPos;
+    }
+
+    override function update (elapsed:Float) {
+        if (!scene.levelOver || name == 'player') {
+            super.update(elapsed);
+        }
     }
 }

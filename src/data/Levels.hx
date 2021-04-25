@@ -1,9 +1,15 @@
 package data;
 
+import actors.Gremlin;
+
 class Levels {
     public static final data = [{
         path: AssetPaths.floor_1__tmx,
         start: { x: 1, y: 1 },
+        exit: { x: 12, y: 8 },
+        gremlins: [{
+            pos: { x: 4, y: 4 }, type: Slow
+        }],
         rocks: [
             { x: 13, y: 1 }
         ],
@@ -20,6 +26,20 @@ class Levels {
             { x: 13, y: 8 }
         ],
         litChance: 1,
+        setLitChance: 0
+    }, {
+        path: AssetPaths.floor_1__tmx,
+        start: { x: 12, y: 8 },
+        exit: { x: 1, y: 1 },
+        gremlins: [],
+        rocks: [
+            { x: 13, y: 1 }
+        ],
+        torches: [
+            { x: 1, y: 2 }
+        ],
+        torchSets: [],
+        litChance: 0.5,
         setLitChance: 0
     }];
 }

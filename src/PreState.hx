@@ -1,5 +1,6 @@
 package;
 
+import data.Game;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.system.scaleModes.PixelPerfectScaleMode;
@@ -31,6 +32,8 @@ class PreState extends FlxState {
         text.setPosition((FlxG.width - text.width) / 2, (FlxG.height - text.height) / 2);
 
         add(text);
+
+        Game.inst.restart();
     }
     
     override public function update (elapsed:Float) {

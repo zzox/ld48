@@ -1,30 +1,36 @@
 package;
 
-import openfl.display.Tilemap;
 import Utils;
+import actors.Gremlin;
 import actors.Player;
+import data.Game;
 import data.Levels;
 import display.Lighting;
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.FlxSprite;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
-import flixel.util.FlxSort;
+import flixel.tile.FlxTilemap;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxSort;
+import flixel.util.FlxTimer;
 import objects.DItem;
 import objects.Item;
 import objects.Light;
 import objects.TorchSet;
 
 typedef LevelItem = {
+    var start:Bool;
+    var exit:Bool;
     var pos:ItemPos;
     var floorType:FloorType;
     var player:Null<Player>;
-    // var monster:Null<Monster>;
+    var gremlin:Null<Gremlin>;
     var item:Null<Item>;
     var thrownItem:Null<Item>;
     var torchSet:Null<TorchSet>;
@@ -52,8 +58,12 @@ class PlayState extends FlxState {
     var displayGroup:FlxTypedGroup<DItem>;
 
     var player:Player;
+    var gremlins:Array<Gremlin>;
 
     public var lighting:Lighting;
+    var blackCover:FlxSprite;
+
+    public var levelOver:Bool;
 
     override public function create() {
         super.create();
@@ -61,7 +71,7 @@ class PlayState extends FlxState {
         camera.pixelPerfectRender = true;
 
         // TEMP: get from game singleton later
-        var level = 0;
+        var level = Game.inst.level;
         var levelData = Levels.data[level];
         // TODO: hold a torch if level 0
 
@@ -84,9 +94,12 @@ class PlayState extends FlxState {
                 }
 
                 var item = {
+                    start: false,
+                    exit: false,
                     pos: thisPos,
                     floorType: floorType,
                     player: null,
+                    gremlin: null,
                     item: null,
                     thrownItem: null,
                     torchSet: null
@@ -98,9 +111,15 @@ class PlayState extends FlxState {
             gameData.push(row);
         }
 
+        var exitItem = getItem(levelData.exit.x, levelData.exit.y);
+        exitItem.exit = true;
+        var exitPos = Utils.translatePos(levelData.exit);
+        add(new FlxSprite(exitPos.x, exitPos.y, AssetPaths.stair__png));
+
         player = new Player(0, 0, levelData.start, this);
 
         var startItem = getItem(levelData.start.x, levelData.start.y);
+        startItem.start = true;
         startItem.player = player;
 
         displayGroup = new FlxTypedGroup<DItem>();
@@ -129,7 +148,7 @@ class PlayState extends FlxState {
         }
 
         for (torchSetItem in levelData.torchSets) {
-            var torchSetPos:FlxPoint = Utils.translatePos(torchSetItem); // change name
+            var torchSetPos:FlxPoint = Utils.translatePos(torchSetItem);
             var torchSet = new TorchSet(
                 torchSetPos.x,
                 torchSetPos.y,
@@ -144,12 +163,30 @@ class PlayState extends FlxState {
             torchSets.push(torchSet);
         }
 
+        gremlins = [];
+        for (gremlinItem in levelData.gremlins) {
+            var gremlinPos:FlxPoint = Utils.translatePos(gremlinItem.pos);
+            var gremlin = new Gremlin(
+                gremlinPos.x,
+                gremlinPos.y,
+                gremlinItem.pos,
+                gremlinItem.type,
+                this
+            );
+
+            var gremlinFloorItem = getItem(gremlinItem.pos.x, gremlinItem.pos.y);
+            gremlinFloorItem.gremlin = gremlin;
+
+            displayGroup.add(gremlin);
+            gremlins.push(gremlin);
+        }
+
         add(displayGroup);
 
         var alphaCoef = (level / 4 * 0.4) + 0.6;
 
         lighting = new Lighting();
-        lighting.alpha = alphaCoef > 1 ? 1 : alphaCoef;
+        lighting.alpha = /*level == 0 ? 1 : */alphaCoef > 1 ? 1 : alphaCoef;
         lighting.color = FlxColor.BLACK;
 
         for (torch in torchSets) {
@@ -174,6 +211,25 @@ class PlayState extends FlxState {
                 lighting.add(item.light);
             }
         }
+
+        for (gremlin in gremlins) {
+            add(gremlin.eyes);
+        }
+        // add logo if first level
+
+        blackCover = new FlxSprite(0, 0);
+        blackCover.makeGraphic(1, 1, 0xff000000);
+        blackCover.setPosition(player.x + (player.width / 2), player.y + (player.height / 2));
+        blackCover.setGraphicSize(FlxG.width * 2, FlxG.height * 2);
+        FlxTween.tween(
+            blackCover,
+            { "scale.x": 0.001, "scale.y": 0.001 },
+            0.5,
+            { onComplete: (_:FlxTween) -> { blackCover.visible = false; }
+        });
+        add(blackCover);
+
+        levelOver = false;
     }
 
     override public function update(elapsed:Float) {
@@ -191,7 +247,8 @@ class PlayState extends FlxState {
 
         // TODO: buffer/recentcy system
         // only assign if we can go, solving for multiple presses when rounding corners
-        if (!player.moving) {
+        // don't allow if level is over
+        if (!player.moving && !levelOver) {
             if (FlxG.keys.pressed.LEFT) {
                 var checked = checkItem({ x: player.pos.x - 1, y: player.pos.y });
 
@@ -241,6 +298,10 @@ class PlayState extends FlxState {
 
         // if player can move AND has pressed a direction
         if (toItem != null) {
+            if (toItem.exit) {
+                winLevel();
+            }
+
             if (toItem.floorType == Floor) {
                 player.move(toItem.pos);
                 // play steps sound
@@ -359,6 +420,20 @@ class PlayState extends FlxState {
 
     function getItem (x:Int, y:Int):LevelItem {
         return gameData[y][x];
+    }
+
+    function winLevel () {
+        Game.inst.level++;
+        levelOver = true;
+
+        // black graphic
+        blackCover.visible = true;
+        blackCover.setPosition(player.x + (player.width / 2), player.y + (player.height / 2));
+        FlxTween.tween(blackCover, { "scale.x": FlxG.width * 2, "scale.y": FlxG.height * 2 }, 0.5);
+
+        new FlxTimer().start(1, (_:FlxTimer) -> {
+            FlxG.switchState(new PlayState());
+        });
     }
 
     function createTilemap (tileArray:Array<Int>) {

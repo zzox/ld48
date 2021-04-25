@@ -1,6 +1,5 @@
 package objects;
 
-import js.Browser;
 import PlayState;
 import Utils;
 import flixel.math.FlxPoint;
@@ -123,7 +122,6 @@ class Item extends DItem {
     }
 
     public function breakMe () {
-        Browser.console.log('breaking!', lit, broken, light);
         if (lit) {
             extinguish();
         }
