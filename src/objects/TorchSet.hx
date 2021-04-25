@@ -1,6 +1,5 @@
 package objects;
 
-import js.Browser;
 import PlayState;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
@@ -12,13 +11,15 @@ class TorchSet extends FlxGroup {
     public var lit:Bool;
     var x:Float;
     var y:Float;
+    var scene:PlayState;
 
-    public function new (x:Float, y:Float, pos:ItemPos, lit:Bool = false) {
+    public function new (x:Float, y:Float, pos:ItemPos, scene:PlayState, lit:Bool = false) {
         super();
         this.x = x;
         this.y = y;
         this.pos = pos;
         this.lit = lit;
+        this.scene = scene;
 
         lightItems = [];
         torches = [];
@@ -48,7 +49,9 @@ class TorchSet extends FlxGroup {
 
             add(torch);
 
-            // add light!
+            var light = new Light(torch.x - 20, torch.y - 20, Small);
+            lightItems.push(light);
+            scene.lighting.add(light);
         }
 
         lit ? light() : extinguish();

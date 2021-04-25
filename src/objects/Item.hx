@@ -23,6 +23,8 @@ class Item extends DItem {
     public var held:Bool;
     var name:String;
 
+    public var light:Light;
+
     public function new (x:Float, y:Float, type:ItemType, pos:ItemPos) {
         var startingPos:FlxPoint = Utils.translatePos(pos);
 
@@ -30,7 +32,7 @@ class Item extends DItem {
         loadGraphic(AssetPaths.items__png, true, 16, 16);
 
         if (type == Torch) {
-            // TODO: add Light here!
+            light = new Light(x - 16, y - 16, Large);
             name = 'torch';
             canLight = true;
         } else if (type == Rock) {
@@ -48,8 +50,8 @@ class Item extends DItem {
 
         animation.add('torch', [0], 1);
         animation.add('torch-held', [0], 1); // temp?
-        animation.add('torch-lit', [2, 3, 4], 15);
-        animation.add('torch-held-lit', [2, 3, 4], 15); // temp?
+        animation.add('torch-lit', [2, 3, 4], 9);
+        animation.add('torch-held-lit', [2, 3, 4], 9); // temp?
         animation.add('torch-thrown', [8, 9, 10, 11], 15);
         animation.add('torch-thrown-lit', [12, 13, 14, 15], 15);
         animation.add('rock', [16], 1);
@@ -75,7 +77,10 @@ class Item extends DItem {
 
         animation.play(anim);
 
-        // if there is a light, update its position and light status
+        if (light != null) {
+            light.x = x - 16;
+            light.y = y - 16;
+        }
 
         super.update(elapsed);
     }
@@ -97,5 +102,15 @@ class Item extends DItem {
         );
 
         pos = newPos;
+    }
+
+    public function ignite () {
+        lit = true;
+        light.ignite();
+    }
+
+    public function extinguish () {
+        lit = false;
+        light.extinguish();
     }
 }

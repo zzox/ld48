@@ -1,6 +1,8 @@
 package;
 
-import js.Browser;
+import objects.Light;
+import flixel.util.FlxColor;
+import display.Lighting;
 import flixel.math.FlxPoint;
 import flixel.util.FlxSort;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -32,7 +34,7 @@ typedef ItemPos = {
 }
 
 class PlayState extends FlxState {
-    static inline final TILE_SIZE = 16;
+    static inline final TILE_SIZE = 16; // also used for light diff distance
 
     var items:Array<Item>;
     var gameData:Array<Array<LevelItem>>;
@@ -40,6 +42,8 @@ class PlayState extends FlxState {
     var displayGroup:FlxTypedGroup<DItem>;
 
     var player:Player;
+
+    public var lighting:Lighting;
 
     override public function create() {
         super.create();
@@ -49,7 +53,7 @@ class PlayState extends FlxState {
         var playerPos:ItemPos = { x: 2, y: 2 };
 
         // REMOVE: get from game data later
-        var torchPos:ItemPos = { x: 5, y: 2 };
+        var torchPos:ItemPos = { x: 2, y: 2 };
         var torchesPos:ItemPos = { x: 1, y: 8 };
         var torchesPos2:ItemPos = { x: 13, y: 1 };
 
@@ -96,7 +100,8 @@ class PlayState extends FlxState {
                         torchesPosi.x,
                         torchesPosi.y,
                         thisPos,
-                        true // temp
+                        this,
+                        false // temp
                     );
 
                     item.torchSet = torchSet;
@@ -110,7 +115,8 @@ class PlayState extends FlxState {
                         torchesPosi.x,
                         torchesPosi.y,
                         thisPos,
-                        false // temp
+                        this,
+                        true // temp
                     );
 
                     item.torchSet = torchSet;
@@ -132,6 +138,9 @@ class PlayState extends FlxState {
 
         add(displayGroup);
 
+        lighting = new Lighting();
+        lighting.color = FlxColor.BLACK;
+
         for (torch in torchSets) {
             torch.addItems(
                 checkItem({ x: torch.pos.x - 1, y: torch.pos.y }) == null,
@@ -143,7 +152,17 @@ class PlayState extends FlxState {
             add(torch);
         }
 
-        // add lighting
+        add(lighting);
+
+        var holeLightPos = Utils.translatePos(playerPos);
+        var holeLight = new Light(holeLightPos.x - TILE_SIZE, holeLightPos.y - TILE_SIZE, Circle);
+
+        lighting.add(holeLight);
+        for (item in items) {
+            if (item.type == Torch) {
+                lighting.add(item.light);
+            }
+        }
     }
 
     override public function update(elapsed:Float) {
@@ -268,7 +287,7 @@ class PlayState extends FlxState {
         }
 
         if (!item.lit && torchSet.lit) {
-            item.lit = true;
+            item.ignite();
         }
     }
 
@@ -324,5 +343,9 @@ class PlayState extends FlxState {
         tileMap.loadMapFromArray(tileArray, 15, 10, AssetPaths.tiles__png, TILE_SIZE, TILE_SIZE, FlxTilemapAutoTiling.OFF, 1, 1, 1);
         tileMap.useScaleHack = false;
         add(tileMap);
+    }
+
+    function addLight (light:Light) {
+        lighting.add(light);
     }
 }
