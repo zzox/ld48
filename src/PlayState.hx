@@ -285,6 +285,16 @@ class PlayState extends FlxState {
                     lightIfPossible(item, toItem.torchSet);
                 }
 
+                if (item.type == Rock) {
+                    if (toItem.torchSet != null && toItem.torchSet.lit) {
+                        toItem.torchSet.extinguish();
+                    }
+
+                    if (toItem.item != null && toItem.item.type == Torch && toItem.item.lit) {
+                        toItem.item.extinguish();
+                    }
+                }
+
                 if (toItem.floorType == Wall) {
                     drop(item, item.pos);
                 } else {
