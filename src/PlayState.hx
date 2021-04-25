@@ -63,6 +63,7 @@ class PlayState extends FlxState {
         // TEMP: get from game singleton later
         var level = 0;
         var levelData = Levels.data[level];
+        // TODO: hold a torch if level 0
 
         var map = new TiledMap(levelData.path);
         var layerData = map.getLayer('floor');
@@ -105,6 +106,15 @@ class PlayState extends FlxState {
         displayGroup = new FlxTypedGroup<DItem>();
         displayGroup.add(player);
 
+        for (rockItem in levelData.rocks) {
+            var rock = new Item(0, 0, Rock, rockItem);
+
+            var rockFloorItem = getItem(rockItem.x, rockItem.y);
+            items.push(rock);
+            rockFloorItem.item = rock;
+            displayGroup.add(rock);
+        }
+
         for (torchItem in levelData.torches) {
             var torch = new Item(0, 0, Torch, torchItem);
 
@@ -136,7 +146,10 @@ class PlayState extends FlxState {
 
         add(displayGroup);
 
+        var alphaCoef = (level / 4 * 0.4) + 0.6;
+
         lighting = new Lighting();
+        lighting.alpha = alphaCoef > 1 ? 1 : alphaCoef;
         lighting.color = FlxColor.BLACK;
 
         for (torch in torchSets) {
@@ -233,9 +246,9 @@ class PlayState extends FlxState {
             }
         }
 
-        // pick up logic
+        // throw/pick up logic
         if (FlxG.keys.anyJustPressed([SPACE, X])) {
-            var thrown:Bool = false;
+            var didThrow:Bool = false;
 
             if (player.held != null) {
                 var heldItem = player.held;
@@ -245,11 +258,11 @@ class PlayState extends FlxState {
 
                 player.held = null;
 
-                thrown = true;
+                didThrow = true;
             }
 
             // if we didn't throw something, we can try picking up something
-            if (!thrown) {
+            if (!didThrow) {
                 var atItem = getItem(player.pos.x, player.pos.y);
                 // switch the items out, temporarily held by nothing
                 if (atItem.item != null) {
@@ -296,19 +309,16 @@ class PlayState extends FlxState {
         item.thrown = null;
 
         var floorItem:LevelItem = getItem(pos.x, pos.y);
-
-        // switch the items out, temporarily held by nothing
         if (floorItem.item != null) {
-            var tempItem = floorItem.item;
-
-
-            // break one of the two
-            // if the floor item is a rock, kill the thrown item
-                // otherwise, kill the floor item
-
+            if (floorItem.item.type == Rock) {
+                item.breakMe();
+            } else {
+                floorItem.item.breakMe();
+                floorItem.item = item;
+            }
+        } else {
+            floorItem.item = item;
         }
-
-        floorItem.item = item;
     }
 
     function checkItem (pos:ItemPos):Null<LevelItem> {

@@ -13,7 +13,7 @@ class Player extends Actor {
     public function new(x:Float, y:Float, pos:ItemPos, scene:PlayState) {
         var startingPos:FlxPoint = Utils.translatePos(pos);
 
-        super(startingPos.x, startingPos.y, 'player', pos, 300, new FlxPoint(5, 2));
+        super(startingPos.x, startingPos.y, 'player', pos, 300, new FlxPoint(5, 0));
 
         this.scene = scene;
         depth = 2;

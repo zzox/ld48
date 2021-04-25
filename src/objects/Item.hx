@@ -1,10 +1,12 @@
 package objects;
 
-import flixel.tweens.FlxTween;
-import objects.DItem.DItem;
-import flixel.math.FlxPoint;
+import js.Browser;
 import PlayState;
 import Utils;
+import flixel.math.FlxPoint;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import objects.DItem.DItem;
 
 enum ItemType {
     Torch;
@@ -21,6 +23,7 @@ class Item extends DItem {
     public var canLight:Bool;
     public var lit:Bool;
     public var held:Bool;
+    public var broken:Bool;
     var name:String;
 
     public var light:Light;
@@ -47,6 +50,7 @@ class Item extends DItem {
         held = false;
         lit = false;
         moving = false;
+        broken = false;
 
         animation.add('torch', [0], 1);
         animation.add('torch-held', [0], 1); // temp?
@@ -54,14 +58,18 @@ class Item extends DItem {
         animation.add('torch-held-lit', [2, 3, 4], 6); // temp?
         animation.add('torch-thrown', [8, 9, 10, 11], 15);
         animation.add('torch-thrown-lit', [12, 13, 14, 15], 15);
-        animation.add('rock', [16], 1);
-        animation.add('rock-held', [16], 1); // temp?
-        animation.add('rock-thrown', [16, 18, 19, 20], 15);
+        animation.add('torch-broke', [16], 1);
+        animation.add('rock', [17], 1);
+        animation.add('rock-held', [17], 1); // temp?
+        animation.add('rock-thrown', [17, 19, 20, 21], 15);
+        animation.add('rock-broke', [22], 1);
     }
 
     override public function update (elapsed:Float) {
         var anim = name;
-        if (held) {
+        if (broken) {
+            anim += '-broke';
+        } else if (held) {
             anim += '-held';
             depth = 5;
         } else if (thrown != null) {
@@ -112,5 +120,16 @@ class Item extends DItem {
     public function extinguish () {
         lit = false;
         light.extinguish();
+    }
+
+    public function breakMe () {
+        Browser.console.log('breaking!', lit, broken, light);
+        if (lit) {
+            extinguish();
+        }
+
+        broken = true;
+
+        new FlxTimer().start(1, (_:FlxTimer) -> { this.kill(); });
     }
 }

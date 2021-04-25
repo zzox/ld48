@@ -54,7 +54,7 @@ class TorchSet extends FlxGroup {
             scene.lighting.add(light);
         }
 
-        lit ? light() : extinguish();
+        lit ? light() : null;
     }
 
     public function light () {

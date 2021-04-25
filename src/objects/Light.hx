@@ -22,10 +22,10 @@ class Light extends FlxSprite {
         animation.add('circle-large', [2], 1);
         animation.add('small-ignite', [3, 4, 5], 6, false);
         animation.add('small-lit', [6, 7, 8], 6);
-        animation.add('small-extiguish', [5, 4, 3], 6, false);
+        animation.add('small-extinguish', [5, 4, 3], 6, false);
         animation.add('large-ignite', [9, 10, 11], 6, false);
         animation.add('large-lit', [12, 13, 14], 6);
-        animation.add('large-extiguish', [11, 10, 9], 6, false);
+        animation.add('large-extinguish', [11, 10, 9], 6, false);
         animation.finishCallback = animOnComplete;
 
         if (size == Circle) {
