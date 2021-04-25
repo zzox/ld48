@@ -45,20 +45,23 @@ class Gremlin extends Actor {
 
     public function new (x:Float, y:Float, pos:ItemPos, type:GremlinType, scene:PlayState) {
         var gremData = Gremlin.gremlinMap[type];
-        super(x, y, 'gremlin', pos, gremData.speed, scene, new FlxPoint());
+        super(x, y, 'gremlin', pos, gremData.speed, scene, new FlxPoint(5, 5));
+
+        offset.set(5, 5);
+        setSize(6, 6);
         
         loadGraphic(AssetPaths.gremlin__png, true, 16, 16);
         animation.add('creep', [0], 1);
-        animation.add('attack', [1, 2, 3, 4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1], 20, false);
-        animation.add('die', [4, 4, 3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1], 30, false);
+        animation.add('attack', [4, 3, 2, 4, 4, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1], 20, false);
+        animation.add('die', [1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1], 30, false);
         animation.finishCallback = (animName:String) -> {
             if (animName == 'attack') {
-                if (dead) {
-                    eyes.kill();
-                    this.kill();
-                }
-
                 animation.play('creep');
+            }
+
+            if (animName == 'die') {
+                eyes.kill();
+                this.kill();
             }
         }
 
@@ -86,6 +89,10 @@ class Gremlin extends Actor {
     }
 
     public function attack () {
+        if (moveTween != null) {
+            moveTween.cancel();
+        }
+
         animation.play('attack');
         light.extinguish();
         hideEyes(false);
@@ -96,6 +103,8 @@ class Gremlin extends Actor {
         new FlxTimer().start(1, (_:FlxTimer) -> {
             if (!die) {
                 eyes.visible = true;
+            } else {
+                this.kill();
             }
         });
     }
@@ -103,8 +112,8 @@ class Gremlin extends Actor {
     override public function update (elapsed:Float) {
         super.update(elapsed);
 
-        eyes.setPosition(x, y);
-        light.setPosition(x - 16, y - 16);
+        eyes.setPosition(x - displayOffset.x, y - displayOffset.y);
+        light.setPosition(x - 16 - displayOffset.x, y - 16 - displayOffset.y);
     }
 
     function startingDir () {

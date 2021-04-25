@@ -50,7 +50,6 @@ class Light extends FlxSprite {
     }
 
     public function ignite () {
-        // play sound
         if (size == Small) {
             animation.play('small-ignite');
         } else {
@@ -59,7 +58,6 @@ class Light extends FlxSprite {
     }
 
     public function extinguish () {
-        // play sound
         if (size == Small) {
             animation.play('small-extinguish');
         } else {

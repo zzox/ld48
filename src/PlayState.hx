@@ -13,6 +13,7 @@ import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxTween;
@@ -64,6 +65,15 @@ class PlayState extends FlxState {
     var blackCover:FlxSprite;
 
     public var levelOver:Bool;
+
+    var cantSound:FlxSound; //
+    var extinguishSound:FlxSound; //
+    var igniteSound:FlxSound; //
+    var pickupSound:FlxSound; //
+    // var stepsSound:FlxSound; // sucks
+    var downStepsSound:FlxSound; //
+    var donShriekSound:FlxSound; //
+    var gremlinShriekSound:FlxSound; //
 
     override public function create() {
         super.create();
@@ -231,6 +241,14 @@ class PlayState extends FlxState {
         add(blackCover);
 
         levelOver = false;
+
+        cantSound = FlxG.sound.load(AssetPaths.cant__wav, 1);
+        extinguishSound = FlxG.sound.load(AssetPaths.extinguish__wav, 1);
+        igniteSound = FlxG.sound.load(AssetPaths.ignite__wav, 1);
+        pickupSound = FlxG.sound.load(AssetPaths.pick_up__wav, 1);
+        downStepsSound = FlxG.sound.load(AssetPaths.down_steps__wav, 1);
+        donShriekSound = FlxG.sound.load(AssetPaths.don_shriek__wav, 1);
+        gremlinShriekSound = FlxG.sound.load(AssetPaths.gremlin_shriek__wav, 1);
     }
 
     override public function update(elapsed:Float) {
@@ -308,9 +326,10 @@ class PlayState extends FlxState {
                 currentPlayerItem.player = null;
                 player.move(toItem.pos);
                 toItem.player = player;
-                // play steps sound
             } else {
-                // already checked, but we can play sound here
+                if (!cantSound.playing) {
+                    cantSound.play();
+                }
             }
         }
 
@@ -326,6 +345,8 @@ class PlayState extends FlxState {
 
                 player.held = null;
 
+                igniteSound.play();
+
                 didThrow = true;
             }
 
@@ -338,8 +359,11 @@ class PlayState extends FlxState {
                     atItem.item = null;
 
                     player.pickUp(tempItem);
+                    pickupSound.play();
                 } else {
-                    // play miss sound
+                    if (!cantSound.playing) {
+                        cantSound.play();
+                    }
                 }
             }
         }
@@ -355,12 +379,24 @@ class PlayState extends FlxState {
                     gremlin.move(toItem.pos);
                     toItem.gremlin = gremlin;
 
-                    // if there's a player, kill it
+                    if (gremlin.dir == Right) {
+                        gremlin.flipX = true;
+                        gremlin.eyes.flipX = true;
+                    }
+
+                    if (gremlin.dir == Left) {
+                        gremlin.flipX = false;
+                        gremlin.eyes.flipX = false;
+                    }
                 } else {
                     gremlin.dir = gremlin.clockwise
                         ? Utils.clockwiseMap[gremlin.dir]
                         : Utils.counterClockwiseMap[gremlin.dir];
                 }
+            }
+
+            if (!levelOver) {
+                FlxG.overlap(gremlin, player, loseLevel);
             }
         }
 
@@ -371,6 +407,7 @@ class PlayState extends FlxState {
 
                 if (toItem.gremlin != null) {
                     toItem.gremlin.killMe();
+                    gremlinShriekSound.play();
                     toItem.gremlin = null;
                     drop(item, item.pos);
                     if (item.type == Torch) {
@@ -387,15 +424,18 @@ class PlayState extends FlxState {
                 if (item.type == Rock) {
                     if (toItem.torchSet != null && toItem.torchSet.lit) {
                         toItem.torchSet.extinguish();
+                        extinguishSound.play();
                     }
 
                     if (toItem.item != null && toItem.item.type == Torch && toItem.item.lit) {
                         toItem.item.extinguish();
+                        extinguishSound.play();
                     }
                 }
 
                 if (toItem.floorType == Wall) {
                     drop(item, item.pos);
+                    cantSound.play();
                 } else {
                     item.throwMe(toItem.pos, item.thrown);
                 }
@@ -406,10 +446,12 @@ class PlayState extends FlxState {
     function lightIfPossible (item:Item, torchSet:TorchSet) {
         if (item.lit && !torchSet.lit) {
             torchSet.light();
+            igniteSound.play();
         }
 
         if (!item.lit && torchSet.lit) {
             item.ignite();
+            igniteSound.play();
         }
     }
 
@@ -476,10 +518,35 @@ class PlayState extends FlxState {
         Game.inst.level++;
         levelOver = true;
 
+        downStepsSound.play();
+
         // black graphic
         blackCover.visible = true;
         blackCover.setPosition(player.x + (player.width / 2), player.y + (player.height / 2));
         FlxTween.tween(blackCover, { "scale.x": FlxG.width * 2, "scale.y": FlxG.height * 2 }, 0.5);
+
+        new FlxTimer().start(1, (_:FlxTimer) -> {
+            FlxG.switchState(new PlayState());
+        });
+    }
+
+    function loseLevel (gremlin:Gremlin, _:Player) {
+        levelOver = true;
+        player.die();
+        gremlin.attack();
+
+        donShriekSound.play();
+
+        if (player.held != null) {
+            drop(player.held, player.pos);
+        }
+
+        blackCover.visible = true;
+        blackCover.setPosition(player.x + (player.width / 2), player.y + (player.height / 2));
+
+        new FlxTimer().start(0.5, (_:FlxTimer) -> {
+            FlxTween.tween(blackCover, { "scale.x": FlxG.width * 2, "scale.y": FlxG.height * 2 }, 0.5);
+        });
 
         new FlxTimer().start(1, (_:FlxTimer) -> {
             FlxG.switchState(new PlayState());

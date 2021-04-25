@@ -1,9 +1,10 @@
 package actors;
 
-import flixel.math.FlxPoint;
-import objects.Item;
 import PlayState;
 import Utils;
+import flixel.math.FlxPoint;
+import flixel.tweens.FlxTween;
+import objects.Item;
 
 class Player extends Actor {
     public var held:Null<Item>;
@@ -23,13 +24,14 @@ class Player extends Actor {
 
         animation.add('stand', [0]);
         animation.add('run', [0, 0, 1, 1, 1, 2, 2, 0, 0, 3, 3, 3, 4, 4], 24);
-
-        animation.play('run');
+        animation.add('die', [5], 1);
     }
 
     override public function update (elapsed:Float) {
         // TODO: move to parent?
-        if (moving) {
+        if (dead) {
+            animation.play('dead');
+        } else if (moving) {
             animation.play('run');
         } else {
             animation.play('stand');
@@ -51,7 +53,6 @@ class Player extends Actor {
 
         held = item;
         item.held = true;
-        // play sound
     }
 
     // drop the item
@@ -61,5 +62,14 @@ class Player extends Actor {
         // if the item held is being held its false,
         // then if we are holding something thats null lol
         held = null;
+    }
+
+    public function die () {
+        dead = true;
+        if (moveTween != null) {
+            moveTween.cancel();
+        }
+
+        animation.play('die');
     }
 }

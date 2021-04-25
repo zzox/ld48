@@ -2,7 +2,9 @@ package objects;
 
 import PlayState;
 import Utils;
+import flixel.FlxG;
 import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import objects.DItem.DItem;
@@ -26,6 +28,8 @@ class Item extends DItem {
     var name:String;
 
     public var light:Light;
+
+    var breakSound:FlxSound;
 
     public function new (x:Float, y:Float, type:ItemType, pos:ItemPos) {
         var startingPos:FlxPoint = Utils.translatePos(pos);
@@ -62,6 +66,8 @@ class Item extends DItem {
         animation.add('rock-held', [17], 1); // temp?
         animation.add('rock-thrown', [17, 19, 20, 21], 15);
         animation.add('rock-broke', [22], 1);
+
+        breakSound = FlxG.sound.load(AssetPaths.break__wav, 1);
     }
 
     override public function update (elapsed:Float) {
@@ -126,6 +132,7 @@ class Item extends DItem {
         }
 
         broken = true;
+        breakSound.play();
 
         new FlxTimer().start(1, (_:FlxTimer) -> { this.kill(); });
     }
