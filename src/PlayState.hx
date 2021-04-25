@@ -200,6 +200,7 @@ class PlayState extends FlxState {
                 }
 
                 player.isFacing = Left;
+                player.flipX = false;
             }
 
             if (FlxG.keys.pressed.RIGHT) {
@@ -210,6 +211,7 @@ class PlayState extends FlxState {
                 }
 
                 player.isFacing = Right;
+                player.flipX = true;
             }
 
             if (FlxG.keys.pressed.UP) {
@@ -241,6 +243,7 @@ class PlayState extends FlxState {
         if (toItem != null) {
             if (toItem.floorType == Floor) {
                 player.move(toItem.pos);
+                // play steps sound
             } else {
                 // already checked, but we can play sound here
             }
