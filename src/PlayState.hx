@@ -1,11 +1,14 @@
 package;
 
+import openfl.display.Tilemap;
 import Utils;
 import actors.Player;
 import data.Levels;
 import display.Lighting;
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.addons.editors.tiled.TiledMap;
+import flixel.addons.editors.tiled.TiledTileLayer;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
@@ -33,8 +36,15 @@ typedef ItemPos = {
     var y:Int;
 }
 
+enum FloorType {
+    Wall;
+    Floor;
+}
+
 class PlayState extends FlxState {
     static inline final TILE_SIZE = 16; // also used for light diff distance
+    static inline final LEVEL_WIDTH = 15; // width in tiles
+    static inline final LEVEL_HEIGHT = 10; // width in tiles
 
     var items:Array<Item>;
     var gameData:Array<Array<LevelItem>>;
@@ -50,28 +60,25 @@ class PlayState extends FlxState {
 
         camera.pixelPerfectRender = true;
 
-        var playerPos:ItemPos = { x: 2, y: 2 };
+        // TEMP: get from game singleton later
+        var level = 0;
+        var levelData = Levels.data[level];
 
-        // REMOVE: get from game data later
-        var torchPos:ItemPos = { x: 2, y: 2 };
-        var torchesPos:ItemPos = { x: 1, y: 8 };
-        var torchesPos2:ItemPos = { x: 13, y: 1 };
+        var map = new TiledMap(levelData.path);
+        var layerData = map.getLayer('floor');
+        var tileArray:Array<Int> = cast(layerData, TiledTileLayer).tileArray;
+        createTilemap(tileArray);
 
-        player = new Player(0, 0, playerPos, this);
-
-        var tileArray = [];
         var torchSets = [];
         gameData = [];
         items = [];
-        for (y in 0...Levels.data.length) {
+        for (y in 0...LEVEL_HEIGHT) {
             var row = [];
-            for (x in 0...Levels.data[y].length) {
-                tileArray.push(Levels.data[y][x].item);
-
+            for (x in 0...LEVEL_WIDTH) {
                 var thisPos:ItemPos = { x: x, y: y };
 
                 var floorType = Wall;
-                if (Levels.data[y][x].item == 6) {
+                if (tileArray[y * LEVEL_WIDTH + x] == 6) {
                     floorType = Floor;
                 }
 
@@ -84,57 +91,48 @@ class PlayState extends FlxState {
                     torchSet: null
                 };
 
-                if (x == playerPos.x && y == playerPos.y) {
-                    item.player = player;
-                }
-
-                if (x == torchPos.x && y == torchPos.y) {
-                    var torch = new Item(0, 0, Torch, torchPos);
-                    items.push(torch);
-                    item.item = torch;
-                }
-
-                if (x == torchesPos.x && y == torchesPos.y) {
-                    var torchesPosi:FlxPoint = Utils.translatePos(thisPos); // change name
-                    var torchSet = new TorchSet(
-                        torchesPosi.x,
-                        torchesPosi.y,
-                        thisPos,
-                        this,
-                        false // temp
-                    );
-
-                    item.torchSet = torchSet;
-
-                    torchSets.push(torchSet);
-                }
-
-                if (x == torchesPos2.x && y == torchesPos2.y) {
-                    var torchesPosi:FlxPoint = Utils.translatePos(thisPos); // change name
-                    var torchSet = new TorchSet(
-                        torchesPosi.x,
-                        torchesPosi.y,
-                        thisPos,
-                        this,
-                        true // temp
-                    );
-
-                    item.torchSet = torchSet;
-
-                    torchSets.push(torchSet);
-                }
-
                 row.push(item);
             }
 
             gameData.push(row);
         }
 
-        createTilemap(tileArray);
+        player = new Player(0, 0, levelData.start, this);
+
+        var startItem = getItem(levelData.start.x, levelData.start.y);
+        startItem.player = player;
 
         displayGroup = new FlxTypedGroup<DItem>();
         displayGroup.add(player);
-        for (item in items) displayGroup.add(item);
+
+        for (torchItem in levelData.torches) {
+            var torch = new Item(0, 0, Torch, torchItem);
+
+            var torchFloorItem = getItem(torchItem.x, torchItem.y);
+            items.push(torch);
+            torchFloorItem.item = torch;
+            displayGroup.add(torch);
+
+            if (Math.random() < levelData.litChance) {
+                torch.ignite();
+            }
+        }
+
+        for (torchSetItem in levelData.torchSets) {
+            var torchSetPos:FlxPoint = Utils.translatePos(torchSetItem); // change name
+            var torchSet = new TorchSet(
+                torchSetPos.x,
+                torchSetPos.y,
+                torchSetItem,
+                this,
+                Math.random() < levelData.setLitChance
+            );
+
+            var torchSetFloorItem = getItem(torchSetItem.x, torchSetItem.y);
+            torchSetFloorItem.torchSet = torchSet;
+
+            torchSets.push(torchSet);
+        }
 
         add(displayGroup);
 
@@ -154,7 +152,7 @@ class PlayState extends FlxState {
 
         add(lighting);
 
-        var holeLightPos = Utils.translatePos(playerPos);
+        var holeLightPos = Utils.translatePos(levelData.start);
         var holeLight = new Light(holeLightPos.x - TILE_SIZE, holeLightPos.y - TILE_SIZE, Circle);
 
         lighting.add(holeLight);

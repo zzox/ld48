@@ -1,21 +1,22 @@
 package data;
 
-enum FloorType {
-    Wall;
-    Floor;
-}
+
 
 class Levels {
-    public static final data = [
-        [{item: 1},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 2},{item: 3}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 5},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 6},{item: 7}],
-        [{item: 9},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 10},{item: 11}]
-    ];
+    public static final data = [{
+        path: AssetPaths.floor_1__tmx,
+        start: { x: 1, y: 1 },
+        torches: [
+            { x: 1, y: 2 }
+        ],
+        torchSets: [
+            { x: 1, y: 2 },
+            { x: 1, y: 4 },
+            { x: 1, y: 6 },
+            { x: 1, y: 8 },
+            { x: 13, y: 1 }
+        ],
+        litChance: 1,
+        setLitChance: 0
+    }];
 }
