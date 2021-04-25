@@ -1,21 +1,21 @@
 package;
 
-import objects.Light;
-import flixel.util.FlxColor;
-import display.Lighting;
-import flixel.math.FlxPoint;
-import flixel.util.FlxSort;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import objects.DItem;
+import Utils;
 import actors.Player;
 import data.Levels;
+import display.Lighting;
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
+import flixel.util.FlxSort;
+import flixel.util.FlxColor;
+import objects.DItem;
 import objects.Item;
+import objects.Light;
 import objects.TorchSet;
-import Utils;
 
 typedef LevelItem = {
     var pos:ItemPos;
@@ -236,21 +236,9 @@ class PlayState extends FlxState {
         }
 
         // pick up logic
-        if (FlxG.keys.anyJustPressed([TAB, Z])) {
-            var atItem = getItem(player.pos.x, player.pos.y);
-
-            // switch the items out, temporarily held by nothing
-            if (atItem.item != null) {
-                var tempItem = atItem.item;
-                atItem.item = null;
-
-                player.pickUp(tempItem);
-            } else {
-                // play miss sound
-            }
-        }
-
         if (FlxG.keys.anyJustPressed([SPACE, X])) {
+            var thrown:Bool = false;
+
             if (player.held != null) {
                 var heldItem = player.held;
                 heldItem.throwMe(player.pos, player.isFacing);
@@ -258,8 +246,22 @@ class PlayState extends FlxState {
                 levelItem.thrownItem = heldItem;
 
                 player.held = null;
-            } else {
-                // play miss sound
+
+                thrown = true;
+            }
+
+            // if we didn't throw something, we can try picking up something
+            if (!thrown) {
+                var atItem = getItem(player.pos.x, player.pos.y);
+                // switch the items out, temporarily held by nothing
+                if (atItem.item != null) {
+                    var tempItem = atItem.item;
+                    atItem.item = null;
+
+                    player.pickUp(tempItem);
+                } else {
+                    // play miss sound
+                }
             }
         }
 
