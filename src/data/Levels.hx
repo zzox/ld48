@@ -95,16 +95,71 @@ class Levels {
             pos: { x: 11, y: 7 }, lit: false
         }]
     }, {
+        path: AssetPaths.floor_4__tmx,
+        sound: 3,
+        start: { x: 1, y: 1 },
+        exit: { x: 8, y: 4 },
+        gremlins: [{
+            pos: { x: 8, y: 6 }, type: Medium
+        }, {
+            pos: { x: 13, y: 1 }, type: Slow
+        }],
+        rocks: [
+            { x: 3, y: 1 }
+        ],
+        torches: [{
+            pos: { x: 1, y: 1 }, lit: false
+        }],
+        torchSets: [{
+            pos: { x: 3, y: 1 }, lit: true
+        }, {
+            pos: { x: 10, y: 1 }, lit: true
+        }, {
+            pos: { x: 11, y: 7 }, lit: true
+        }]
+    }, {
+        path: AssetPaths.floor_5__tmx,
+        sound: 4,
+        start: { x: 8, y: 4 },
+        exit: { x: 7, y: 8 },
+        gremlins: [{
+            pos: { x: 12, y: 8 }, type: Slow
+        }],
+        rocks: [
+            { x: 1, y: 1 },
+            { x: 13, y: 1 }
+        ],
+        torches: [{
+            pos: { x: 8, y: 4 }, lit: false
+        }],
+        torchSets: [{
+            pos: { x: 1, y: 1 }, lit: true
+        }, {
+            pos: { x: 13, y: 1 }, lit: true
+        }, {
+            pos: { x: 6, y: 3 }, lit: false
+        }, {
+            pos: { x: 6, y: 3 }, lit: false
+        }, {
+            pos: { x: 2, y: 6 }, lit: false
+        }, {
+            pos: { x: 12, y: 6 }, lit: false
+        }]
+    }, {
         path: AssetPaths.floor_1__tmx,
         sound: 5,
-        start: { x: 1, y: 1 },
+        start: { x: 7, y: 8 },
         exit: null,
         gremlins: [],
         torches: [{
-            pos: { x: 1, y: 2 }, lit: true
+            pos: { x: 8, y: 1 }, lit: true
+        }, {
+            pos: { x: 8, y: 8 }, lit: false
         }],
         rocks: [],
         torchSets: [{
+            pos: { x: 1, y: 1 }, lit: false
+        }, {
             pos: { x: 1, y: 3 }, lit: false
         }, {
             pos: { x: 1, y: 5 }, lit: false

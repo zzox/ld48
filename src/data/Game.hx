@@ -9,6 +9,6 @@ class Game {
     }
 
     public function restart() {
-        level = 3;
+        level = 0;
     }
 }
