@@ -66,14 +66,16 @@ class PlayState extends FlxState {
 
     public var levelOver:Bool;
 
-    var cantSound:FlxSound; //
-    var extinguishSound:FlxSound; //
-    var igniteSound:FlxSound; //
-    var pickupSound:FlxSound; //
+    var cantSound:FlxSound;
+    var extinguishSound:FlxSound;
+    var igniteSound:FlxSound;
+    var pickupSound:FlxSound;
     // var stepsSound:FlxSound; // sucks
-    var downStepsSound:FlxSound; //
-    var donShriekSound:FlxSound; //
-    var gremlinShriekSound:FlxSound; //
+    var downStepsSound:FlxSound;
+    var donShriekSound:FlxSound;
+    var gremlinShriekSound:FlxSound;
+
+    var hud:FlxSprite;
 
     override public function create() {
         super.create();
@@ -145,29 +147,29 @@ class PlayState extends FlxState {
         }
 
         for (torchItem in levelData.torches) {
-            var torch = new Item(0, 0, Torch, torchItem);
+            var torch = new Item(0, 0, Torch, torchItem.pos);
 
-            var torchFloorItem = getItem(torchItem.x, torchItem.y);
+            var torchFloorItem = getItem(torchItem.pos.x, torchItem.pos.y);
             items.push(torch);
             torchFloorItem.item = torch;
             displayGroup.add(torch);
 
-            if (Math.random() < levelData.litChance) {
+            if (torchItem.lit) {
                 torch.ignite();
             }
         }
 
         for (torchSetItem in levelData.torchSets) {
-            var torchSetPos:FlxPoint = Utils.translatePos(torchSetItem);
+            var torchSetPos:FlxPoint = Utils.translatePos(torchSetItem.pos);
             var torchSet = new TorchSet(
                 torchSetPos.x,
                 torchSetPos.y,
-                torchSetItem,
+                torchSetItem.pos,
                 this,
-                Math.random() < levelData.setLitChance
+                torchSetItem.lit
             );
 
-            var torchSetFloorItem = getItem(torchSetItem.x, torchSetItem.y);
+            var torchSetFloorItem = getItem(torchSetItem.pos.x, torchSetItem.pos.y);
             torchSetFloorItem.torchSet = torchSet;
 
             torchSets.push(torchSet);
@@ -193,10 +195,8 @@ class PlayState extends FlxState {
 
         add(displayGroup);
 
-        var alphaCoef = (level / 4 * 0.4) + 0.6;
-
         lighting = new Lighting();
-        lighting.alpha = /*level == 0 ? 1 : */alphaCoef > 1 ? 1 : alphaCoef;
+        // lighting.alpha = 0.7; // cheat
         lighting.color = FlxColor.BLACK;
 
         for (torch in torchSets) {
@@ -226,7 +226,14 @@ class PlayState extends FlxState {
             add(gremlin.eyes);
             lighting.add(gremlin.light);
         }
-        // add logo if first level
+
+        hud = new FlxSprite(0, 0);
+        hud.loadGraphic(AssetPaths.items__png, true, 16, 16);
+        hud.animation.add('torch', [0], 1);
+        hud.animation.add('torch-lit', [2, 3, 4], 6);
+        hud.animation.add('rock', [17], 1);
+        hud.visible = false;
+        add(hud);
 
         blackCover = new FlxSprite(0, 0);
         blackCover.makeGraphic(1, 1, 0xff000000);
@@ -272,6 +279,11 @@ class PlayState extends FlxState {
 
 			FlxTween.tween(sound, { volume: vol }, 1.5);
 		}
+
+        if (level == 0) {
+            var logo = new FlxSprite(88, 72, AssetPaths.logo__png);
+            add(logo);
+        }
     }
 
     override public function update(elapsed:Float) {
@@ -280,6 +292,22 @@ class PlayState extends FlxState {
         displayGroup.sort((order:Int, obj1:DItem, obj2:DItem) ->
             FlxSort.byValues(order, obj1.depth, obj2.depth)
         );
+
+        if (FlxG.keys.justPressed.R && !levelOver) {
+            restartLevel();
+        }
+
+        if (player.held != null) {
+            hud.visible = true;
+
+            if (player.held.type == Rock) {
+                hud.animation.play('rock');
+            } else {
+                hud.animation.play(player.held.lit ? 'torch-lit' : 'torch');
+            }
+        } else {
+            hud.visible = false;
+        }
 
         super.update(elapsed);
     }
@@ -557,6 +585,28 @@ class PlayState extends FlxState {
         levelOver = true;
         player.die();
         gremlin.attack();
+
+        donShriekSound.play();
+
+        if (player.held != null) {
+            drop(player.held, player.pos);
+        }
+
+        blackCover.visible = true;
+        blackCover.setPosition(player.x + (player.width / 2), player.y + (player.height / 2));
+
+        new FlxTimer().start(0.5, (_:FlxTimer) -> {
+            FlxTween.tween(blackCover, { "scale.x": FlxG.width * 2, "scale.y": FlxG.height * 2 }, 0.5);
+        });
+
+        new FlxTimer().start(1, (_:FlxTimer) -> {
+            FlxG.switchState(new PlayState());
+        });
+    }
+
+    function restartLevel () {
+        levelOver = true;
+        player.die();
 
         donShriekSound.play();
 

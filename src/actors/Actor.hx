@@ -50,10 +50,4 @@ class Actor extends DItem {
 
         pos = newPos;
     }
-
-    override function update (elapsed:Float) {
-        if (!scene.levelOver || name == 'player') {
-            super.update(elapsed);
-        }
-    }
 }

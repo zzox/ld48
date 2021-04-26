@@ -34,12 +34,12 @@ class Gremlin extends Actor {
         Medium => {
             blinkTime: 3,
             speed: 240,
-            color: 0xffffe737
+            color: 0xfff68f37
         },
         Fast => {
             blinkTime: 6,
             speed: 360,
-            color: 0xffffe737
+            color: 0xffe03c28
         }
     ];
 
