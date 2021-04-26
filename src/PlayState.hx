@@ -11,9 +11,11 @@ import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.addons.editors.tiled.TiledMap;
 import flixel.addons.editors.tiled.TiledTileLayer;
+import flixel.graphics.frames.FlxBitmapFont;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxSound;
+import flixel.text.FlxBitmapText;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxTween;
@@ -24,6 +26,8 @@ import objects.DItem;
 import objects.Item;
 import objects.Light;
 import objects.TorchSet;
+import openfl.Assets;
+
 
 typedef LevelItem = {
     var start:Bool;
@@ -123,10 +127,12 @@ class PlayState extends FlxState {
             gameData.push(row);
         }
 
-        var exitItem = getItem(levelData.exit.x, levelData.exit.y);
-        exitItem.exit = true;
-        var exitPos = Utils.translatePos(levelData.exit);
-        add(new FlxSprite(exitPos.x, exitPos.y, AssetPaths.stair__png));
+        if (levelData.exit != null) {
+            var exitItem = getItem(levelData.exit.x, levelData.exit.y);
+            exitItem.exit = true;
+            var exitPos = Utils.translatePos(levelData.exit);
+            add(new FlxSprite(exitPos.x, exitPos.y, AssetPaths.stair__png));
+        }
 
         player = new Player(0, 0, levelData.start, this);
 
@@ -234,6 +240,27 @@ class PlayState extends FlxState {
         hud.animation.add('rock', [17], 1);
         hud.visible = false;
         add(hud);
+
+        if (level == Levels.data.length - 1) {
+
+            var textBytes = Assets.getText(AssetPaths.miniset__fnt);
+            var XMLData = Xml.parse(textBytes);
+            var fontAngelCode = FlxBitmapFont.fromAngelCode(AssetPaths.miniset__png, XMLData);
+            
+            var text1 = new FlxBitmapText(fontAngelCode);
+            text1.text = 'You won!';
+            text1.letterSpacing = -1;
+            text1.setPosition((FlxG.width - text1.width) / 2, 52);
+
+            var text2 = new FlxBitmapText(fontAngelCode);
+            text2.text = 'Thank you for playing';
+            text2.letterSpacing = -1;
+            text2.setPosition((FlxG.width - text2.width) / 2, 68);
+            
+            add(text1);
+            add(text2);
+        }
+
 
         blackCover = new FlxSprite(0, 0);
         blackCover.makeGraphic(1, 1, 0xff000000);

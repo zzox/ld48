@@ -54,7 +54,7 @@ class Levels {
         path: AssetPaths.floor_2__tmx,
         sound: 1,
         start: { x: 12, y: 8 },
-        exit: { x: 3, y: 3 },
+        exit: { x: 4, y: 3 },
         gremlins: [],
         torches: [{
             pos: { x: 13, y: 5 }, lit: true
@@ -76,7 +76,7 @@ class Levels {
     }, {
         path: AssetPaths.floor_3__tmx,
         sound: 2,
-        start: { x: 3, y: 3 },
+        start: { x: 4, y: 3 },
         exit: { x: 1, y: 1 },
         gremlins: [{
             pos: { x: 12, y: 8 }, type: Slow

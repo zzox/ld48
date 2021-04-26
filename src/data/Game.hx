@@ -1,7 +1,5 @@
 package data;
 
-import objects.Item;
-
 class Game {
     public static final inst:Game = new Game();
     public var level:Int;
@@ -11,6 +9,6 @@ class Game {
     }
 
     public function restart() {
-        level = 0;
+        level = 3;
     }
 }
