@@ -32,9 +32,7 @@ class Levels {
         torches: [{
             pos: { x: 1, y: 2 }, lit: true
         }],
-        rocks: [
-            { x: 13, y: 1 }
-        ],
+        rocks: [],
         torchSets: [{
             pos: { x: 1, y: 3 }, lit: false
         }, {
@@ -124,6 +122,10 @@ class Levels {
         exit: { x: 7, y: 8 },
         gremlins: [{
             pos: { x: 12, y: 8 }, type: Slow
+        }, {
+            pos: { x: 6, y: 1 }, type: Medium
+        }, {
+            pos: { x: 1, y: 8 }, type: Fast
         }],
         rocks: [
             { x: 1, y: 1 },
@@ -154,7 +156,7 @@ class Levels {
         torches: [{
             pos: { x: 8, y: 1 }, lit: true
         }, {
-            pos: { x: 8, y: 8 }, lit: false
+            pos: { x: 7, y: 8 }, lit: false
         }],
         rocks: [],
         torchSets: [{
